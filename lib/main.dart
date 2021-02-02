@@ -10,8 +10,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-          primarySwatch: Colors.orange,
-          accentColor: Colors.orange,
+          primarySwatch: Colors.amber,
+          accentColor: Colors.amber,
           canvasColor: Colors.black,
           appBarTheme:
               Theme.of(context).appBarTheme.copyWith(color: Colors.black),
@@ -47,6 +47,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
       ),
     );
   }
