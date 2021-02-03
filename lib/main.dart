@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iiplanner/calendar.dart';
 
 void main() {
   runApp(MyApp());
@@ -49,7 +50,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Credentials().createCalendar();
+        },
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ),
