@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import "package:googleapis/calendar/v3.dart" as googleCalendar;
 import "package:googleapis_auth/auth_io.dart" as googleAuth;
 import 'package:url_launcher/url_launcher.dart' as urlLauncher;
@@ -8,27 +9,43 @@ class Credentials {
   googleAuth.ClientId _credentials;
 
   static const _scopes = const [googleCalendar.CalendarApi.CalendarScope];
+  static const KEY_G_CALENDAR_API_KEY_ANDROID = "gcalendar_api_key_android";
 
-  Credentials() {
-    if (Platform.isAndroid) {
-      _credentials = new googleAuth.ClientId("", "");
-    } else if (Platform.isIOS) {
-      throw Exception("Not implemented");
-    }
-  }
-
-  void createCalendar() {
+  void createCalendar() async {
     try {
-      googleAuth
-          .clientViaUserConsent(_credentials, _scopes, prompt)
-          .then((googleAuth.AuthClient client) {
-        var calendarApi = googleCalendar.CalendarApi(client);
-        var calendar = googleCalendar.Calendar();
-        calendar.summary = "iiplanner";
-        calendarApi.calendars.insert(calendar).then((value) {
-          print("ADDEDDD_________________$value");
-        });
-      });
+      if (_credentials == null) {
+        if (Platform.isAndroid) {
+          final remoteConfig = await RemoteConfig.instance;
+          await remoteConfig.setDefaults(
+              <String, dynamic>{KEY_G_CALENDAR_API_KEY_ANDROID: ""});
+          await remoteConfig.fetch();
+          await remoteConfig.activateFetched();
+          final apiKey = remoteConfig.getString(KEY_G_CALENDAR_API_KEY_ANDROID);
+
+          print("$apiKey received");
+
+          if (apiKey.isEmpty) {
+            throw Exception("failed to get api key");
+          }
+
+          _credentials = new googleAuth.ClientId(apiKey, "");
+        } else if (Platform.isIOS) {
+          throw Exception("Not implemented");
+        }
+      }
+
+      var client = await googleAuth.clientViaUserConsent(
+        _credentials,
+        _scopes,
+        prompt,
+      );
+
+      final calendarApi = googleCalendar.CalendarApi(client);
+      final calendar = googleCalendar.Calendar();
+      calendar.summary = "iiplanner";
+
+      final value = await calendarApi.calendars.insert(calendar);
+      print("ADDEDDD_________________$value");
     } catch (e) {
       print('Error creating event $e');
     }

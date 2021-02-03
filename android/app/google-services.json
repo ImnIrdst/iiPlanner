@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "897553449320",
+    "project_id": "iiplanner",
+    "storage_bucket": "iiplanner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897553449320:android:d5a4fbb4c754125fc096dd",
+        "android_client_info": {
+          "package_name": "com.imn.iiplanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897553449320-n09mf84adobv0cags03v28nq27v2pc4p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.imn.iiplanner",
+            "certificate_hash": "fc8378edddb66e9e5c5280d2c8fb51cded7f2e5e"
+          }
+        },
+        {
+          "client_id": "897553449320-kbpbe6hhkg24fni3dbta2mg3r0d0l8ba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBK1QF7JU94MNXPQE5fh2z9BxvUgEC4uYo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897553449320-kbpbe6hhkg24fni3dbta2mg3r0d0l8ba.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
