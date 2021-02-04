@@ -11,6 +11,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _calendar = CalendarBloc();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Credentials().createCalendar();
+          _calendar.createCalendar();
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),

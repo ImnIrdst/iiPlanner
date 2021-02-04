@@ -40,7 +40,7 @@ class IIPlannerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'iiPlanner',
       theme: ThemeData(
           primarySwatch: Colors.amber,
           accentColor: Colors.amber,
@@ -49,7 +49,7 @@ class IIPlannerApp extends StatelessWidget {
               Theme.of(context).appBarTheme.copyWith(color: Colors.black),
           visualDensity: VisualDensity.adaptivePlatformDensity,
           brightness: Brightness.dark),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'iiPlanner'),
     );
   }
 }
