@@ -37,16 +37,26 @@ class App extends StatelessWidget {
 }
 
 class IIPlannerApp extends StatelessWidget {
+  final primaryColor = Colors.amber;
+
+  ButtonThemeData _getButtonTheme(context) {
+    return Theme.of(context).buttonTheme.copyWith(buttonColor: primaryColor);
+  }
+
+  AppBarTheme _getAppBarTheme(context) {
+    return Theme.of(context).appBarTheme.copyWith(color: Colors.black);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'iiPlanner',
       theme: ThemeData(
-          primarySwatch: Colors.amber,
-          accentColor: Colors.amber,
+          primarySwatch: primaryColor,
+          accentColor: primaryColor,
           canvasColor: Colors.black,
-          appBarTheme:
-              Theme.of(context).appBarTheme.copyWith(color: Colors.black),
+          buttonTheme: _getButtonTheme(context),
+          appBarTheme: _getAppBarTheme(context),
           visualDensity: VisualDensity.adaptivePlatformDensity,
           brightness: Brightness.dark),
       home: MyHomePage(title: 'iiPlanner'),

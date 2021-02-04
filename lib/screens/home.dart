@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:iiplanner/calendar.dart';
+import 'package:iiplanner/bloc/calendar_bloc.dart';
+import 'package:iiplanner/widgets/loading.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -23,18 +24,29 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'Welcome to iiPlanner',
+            FutureBuilder(
+              future: _calendar.hasIIPlannerCalendar(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  if (snapshot.data == true) {
+                    return Container();
+                  } else {
+                    return RaisedButton(
+                      onPressed: () {
+                        _calendar.createCalendar();
+                      },
+                      child: Text(
+                        'Create iiPlanner Google Calendar',
+                      ),
+                    );
+                  }
+                } else {
+                  return Loading();
+                }
+              },
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _calendar.createCalendar();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ),
     );
   }

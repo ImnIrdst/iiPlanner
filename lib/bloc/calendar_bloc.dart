@@ -7,27 +7,44 @@ import 'package:url_launcher/url_launcher.dart' as urlLauncher;
 
 class CalendarBloc {
   static const KEY_G_CALENDAR_API_KEY_ANDROID = "gcalendar_api_key_android";
+  static const IIPLANNER_CALENDAR_SUMMARY = "iiplanner_calendar_summary";
 
   static const _scopes = const [googleCalendar.CalendarApi.CalendarScope];
 
   googleAuth.ClientId _credentials;
   googleAuth.AuthClient _client;
+  googleCalendar.CalendarApi _calendarApi;
+  googleCalendar.Calendar _calendar;
 
   void createCalendar() async {
-    try {
-      final calendarApi = googleCalendar.CalendarApi(_client);
+    await _init();
 
-      final calendar = googleCalendar.Calendar();
-      calendar.summary = "iiplanner";
+    final calendar = googleCalendar.Calendar();
+    calendar.summary = "iiplanner";
 
-      final value = await calendarApi.calendars.insert(calendar);
-      print("ADDEDDD_________________$value");
-    } catch (e) {
-      print('Error creating event $e');
-    }
+    _calendar = await _calendarApi.calendars.insert(calendar);
+    print("ADDEDDD_________________${_calendar.summary} ${_calendar.id}");
   }
 
-  void hasCalendar() async {}
+  Future<bool> hasIIPlannerCalendar() async {
+    print("hasIIPlannerCalendar");
+
+    await _init();
+
+    print("hasIIPlannerCalendar");
+    final calendarList = await _calendarApi.calendarList.list();
+    print("calendarList $calendarList");
+    final calendarEntry = calendarList.items
+        .firstWhere((it) => it.summary == IIPLANNER_CALENDAR_SUMMARY);
+    print("calendarEntry $calendarEntry");
+    if (calendarEntry != null) {
+      _calendar = await _calendarApi.calendars.get(calendarEntry.id);
+    }
+
+    print("_calendar $_calendar");
+
+    return _calendar != null;
+  }
 
   void prompt(String url) async {
     if (await urlLauncher.canLaunch(url)) {
@@ -40,6 +57,7 @@ class CalendarBloc {
   Future<void> _init() async {
     _credentials ??= await _initCredentials();
     _client ??= await _iniAuthClient();
+    _calendarApi ??= googleCalendar.CalendarApi(_client);
   }
 
   Future<googleAuth.ClientId> _initCredentials() async {
