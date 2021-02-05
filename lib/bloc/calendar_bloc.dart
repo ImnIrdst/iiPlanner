@@ -4,9 +4,31 @@ import "package:google_sign_in/google_sign_in.dart";
 import "package:googleapis/calendar/v3.dart";
 import 'package:googleapis_auth/auth.dart';
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:rxdart/rxdart.dart';
+
+class CalendarState {
+  final bool isLoading;
+  final String calendar;
+
+  CalendarState({this.isLoading, this.calendar});
+
+  CalendarState copyWith({bool isLoading, bool calendarCreated}) {
+    return CalendarState(
+      isLoading: isLoading ?? this.isLoading,
+      calendar: calendarCreated ?? this.calendar,
+    );
+  }
+
+  static CalendarState loadingState() => CalendarState(isLoading: true);
+}
 
 class CalendarBloc {
   static const IIPLANNER_CALENDAR_SUMMARY = "iiplanner";
+
+  final _calendarState = BehaviorSubject<CalendarState>();
+
+  BehaviorSubject<CalendarState> get calendarStateStream =>
+      _calendarState.stream;
 
   AuthClient _client;
   GoogleSignInAccount _currentUser;
@@ -41,6 +63,8 @@ class CalendarBloc {
   }
 
   Future<void> createCalendar() async {
+    _calendarState.add(CalendarState(isLoading: true));
+
     await _init();
 
     final calendarApi = CalendarApi(_client);
@@ -50,10 +74,15 @@ class CalendarBloc {
 
     _calendar = await calendarApi.calendars.insert(calendar);
     print("ADDEDDD_________________${_calendar.summary} ${_calendar.id}");
+
+    _calendarState.add(CalendarState(
+      calendar: "${_calendar.summary} ${_calendar.id}",
+    ));
   }
 
-  Future<bool> hasIIPlannerCalendar() async {
+  Future<void> hasIIPlannerCalendar() async {
     print("hasIIPlannerCalendar");
+    _calendarState.add(CalendarState(isLoading: true));
 
     await _init();
 
@@ -74,6 +103,16 @@ class CalendarBloc {
 
     print("_calendar $_calendar");
 
-    return _calendar != null;
+    if (_calendar != null) {
+      _calendarState.add(CalendarState(
+        calendar: "${_calendar.summary}\n${_calendar.id}",
+      ));
+    } else {
+      calendarStateStream.add(CalendarState());
+    }
+  }
+
+  void release() {
+    _calendarState.close();
   }
 }

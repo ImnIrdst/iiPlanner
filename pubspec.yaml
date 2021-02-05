@@ -9,6 +9,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  rxdart: ^0.25.0
   googleapis: ^0.56.1
   googleapis_auth: ^0.2.12+1
   google_sign_in: ^4.5.9

@@ -15,6 +15,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final _calendar = CalendarBloc();
 
   @override
+  void dispose() {
+    _calendar.release();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _calendar.hasIIPlannerCalendar();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -24,12 +36,18 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            FutureBuilder(
-              future: _calendar.hasIIPlannerCalendar(),
+            StreamBuilder<CalendarState>(
+              initialData: CalendarState(isLoading: true),
+              stream: _calendar.calendarStateStream,
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  if (snapshot.data == true) {
-                    return Container();
+                if (!snapshot.hasData || snapshot.data.isLoading == true) {
+                  return Loading();
+                } else {
+                  final calendar = snapshot.data.calendar;
+                  if (calendar != null) {
+                    return Center(
+                      child: Text(calendar),
+                    );
                   } else {
                     return RaisedButton(
                       onPressed: () async {
@@ -39,8 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Text('Create iiPlanner Google Calendar'),
                     );
                   }
-                } else {
-                  return Loading();
                 }
               },
             ),
