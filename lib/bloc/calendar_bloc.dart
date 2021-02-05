@@ -1,28 +1,54 @@
-import 'dart:io';
-
-import 'package:firebase_remote_config/firebase_remote_config.dart';
-import "package:googleapis/calendar/v3.dart" as googleCalendar;
-import "package:googleapis_auth/auth_io.dart" as googleAuth;
-import 'package:url_launcher/url_launcher.dart' as urlLauncher;
+import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import "package:firebase_auth/firebase_auth.dart";
+import "package:google_sign_in/google_sign_in.dart";
+import "package:googleapis/calendar/v3.dart";
+import 'package:googleapis_auth/auth.dart';
+import 'package:googleapis_auth/auth_io.dart';
 
 class CalendarBloc {
-  static const KEY_G_CALENDAR_API_KEY_ANDROID = "gcalendar_api_key_android";
-  static const IIPLANNER_CALENDAR_SUMMARY = "iiplanner_calendar_summary";
+  static const IIPLANNER_CALENDAR_SUMMARY = "iiplanner";
 
-  static const _scopes = const [googleCalendar.CalendarApi.CalendarScope];
+  AuthClient _client;
+  GoogleSignInAccount _currentUser;
 
-  googleAuth.ClientId _credentials;
-  googleAuth.AuthClient _client;
-  googleCalendar.CalendarApi _calendarApi;
-  googleCalendar.Calendar _calendar;
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: const ["https://www.googleapis.com/auth/calendar.app.created"],
+  );
 
-  void createCalendar() async {
+  Calendar _calendar;
+
+  Future<void> _init() async {
+    await signInWithGoogle();
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    // Trigger the authentication flow
+    _currentUser = await _googleSignIn.signIn();
+    _client ??= await _googleSignIn.authenticatedClient();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication googleAuth =
+        await _currentUser.authentication;
+
+    // Create a new credential
+    final GoogleAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<void> createCalendar() async {
     await _init();
 
-    final calendar = googleCalendar.Calendar();
+    final calendarApi = CalendarApi(_client);
+
+    final calendar = Calendar();
     calendar.summary = "iiplanner";
 
-    _calendar = await _calendarApi.calendars.insert(calendar);
+    _calendar = await calendarApi.calendars.insert(calendar);
     print("ADDEDDD_________________${_calendar.summary} ${_calendar.id}");
   }
 
@@ -31,63 +57,23 @@ class CalendarBloc {
 
     await _init();
 
-    print("hasIIPlannerCalendar");
-    final calendarList = await _calendarApi.calendarList.list();
-    print("calendarList $calendarList");
-    final calendarEntry = calendarList.items
-        .firstWhere((it) => it.summary == IIPLANNER_CALENDAR_SUMMARY);
+    final calendarApi = CalendarApi(_client);
+    final calendarList = await calendarApi.calendarList.list();
+    print("calendarList ${calendarList.items}");
+    CalendarListEntry calendarEntry;
+    calendarList.items.forEach((it) {
+      if (it.summary == IIPLANNER_CALENDAR_SUMMARY) {
+        calendarEntry = it;
+      }
+    });
+    print("for finished");
     print("calendarEntry $calendarEntry");
     if (calendarEntry != null) {
-      _calendar = await _calendarApi.calendars.get(calendarEntry.id);
+      _calendar = await calendarApi.calendars.get(calendarEntry.id);
     }
 
     print("_calendar $_calendar");
 
     return _calendar != null;
-  }
-
-  void prompt(String url) async {
-    if (await urlLauncher.canLaunch(url)) {
-      await urlLauncher.launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  Future<void> _init() async {
-    _credentials ??= await _initCredentials();
-    _client ??= await _iniAuthClient();
-    _calendarApi ??= googleCalendar.CalendarApi(_client);
-  }
-
-  Future<googleAuth.ClientId> _initCredentials() async {
-    if (Platform.isAndroid) {
-      final remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.setDefaults(<String, dynamic>{
-        KEY_G_CALENDAR_API_KEY_ANDROID: "",
-      });
-      await remoteConfig.fetch();
-      await remoteConfig.activateFetched();
-      final apiKey = remoteConfig.getString(KEY_G_CALENDAR_API_KEY_ANDROID);
-
-      print("$apiKey received");
-
-      if (apiKey.isEmpty) {
-        throw Exception("failed to get api key");
-      }
-
-      return googleAuth.ClientId(apiKey, "");
-    } else if (Platform.isIOS) {
-      throw Exception("Not implemented");
-    }
-    throw Exception("failed to return auth client");
-  }
-
-  Future<googleAuth.AuthClient> _iniAuthClient() async {
-    return googleAuth.clientViaUserConsent(
-      _credentials,
-      _scopes,
-      prompt,
-    );
   }
 }

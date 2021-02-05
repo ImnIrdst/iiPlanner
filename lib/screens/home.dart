@@ -32,12 +32,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     return Container();
                   } else {
                     return RaisedButton(
-                      onPressed: () {
-                        _calendar.createCalendar();
+                      onPressed: () async {
+                        await _calendar.createCalendar();
+                        setState(() {});
                       },
-                      child: Text(
-                        'Create iiPlanner Google Calendar',
-                      ),
+                      child: Text('Create iiPlanner Google Calendar'),
                     );
                   }
                 } else {
