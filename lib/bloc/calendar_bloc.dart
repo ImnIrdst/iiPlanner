@@ -4,6 +4,7 @@ import "package:google_sign_in/google_sign_in.dart";
 import "package:googleapis/calendar/v3.dart";
 import 'package:googleapis_auth/auth.dart';
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:iiplanner/utils/logger.dart';
 import 'package:rxdart/rxdart.dart';
 
 class CalendarState {
@@ -73,7 +74,7 @@ class CalendarBloc {
     calendar.summary = "iiplanner";
 
     _calendar = await calendarApi.calendars.insert(calendar);
-    print("ADDEDDD_________________${_calendar.summary} ${_calendar.id}");
+    Logger.d("ADDEDDD_________________${_calendar.summary} ${_calendar.id}");
 
     _calendarState.add(CalendarState(
       calendar: "${_calendar.summary} ${_calendar.id}",
@@ -81,27 +82,27 @@ class CalendarBloc {
   }
 
   Future<void> hasIIPlannerCalendar() async {
-    print("hasIIPlannerCalendar");
+    Logger.d("hasIIPlannerCalendar");
     _calendarState.add(CalendarState(isLoading: true));
 
     await _init();
 
     final calendarApi = CalendarApi(_client);
     final calendarList = await calendarApi.calendarList.list();
-    print("calendarList ${calendarList.items}");
+    Logger.d("calendarList ${calendarList.items}");
     CalendarListEntry calendarEntry;
     calendarList.items.forEach((it) {
       if (it.summary == IIPLANNER_CALENDAR_SUMMARY) {
         calendarEntry = it;
       }
     });
-    print("for finished");
-    print("calendarEntry $calendarEntry");
+    Logger.d("for finished");
+    Logger.d("calendarEntry $calendarEntry");
     if (calendarEntry != null) {
       _calendar = await calendarApi.calendars.get(calendarEntry.id);
     }
 
-    print("_calendar $_calendar");
+    Logger.d("_calendar $_calendar");
 
     if (_calendar != null) {
       _calendarState.add(CalendarState(
